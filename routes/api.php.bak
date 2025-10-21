@@ -1,0 +1,80 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\MarketplaceController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\GeneralController;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
+
+Route::middleware("auth:sanctum")->get("/user", function (Request $request) {
+    return $request->user();
+});
+
+// Rotas do AgroPerto Marketplace API
+Route::prefix("marketplace")->group(function () {
+    // Status da API e Dashboard
+    Route::get("/status", [GeneralController::class, "status"]);
+    Route::get("/dashboard", [GeneralController::class, "dashboard"]);
+    
+    // Categorias
+    Route::get("/categories", [CategoryController::class, "categories"]);
+    
+    // Produtos
+    Route::get("/products", [ProductController::class, "products"]);
+    Route::get("/products/{id}", [ProductController::class, "product"]);
+    Route::post("/products", [ProductController::class, "addProduct"]);
+    
+    // Usuários
+    Route::get("/users", [UserController::class, "users"]);
+    Route::post("/register", [UserController::class, "register"]);
+    Route::post("/login", [UserController::class, "login"]);
+    
+    // Pedidos
+    Route::get("/orders", [OrderController::class, "orders"]);
+    Route::post("/orders", [OrderController::class, "orders"]);
+    
+    // Carrinho
+    Route::post("/cart/add", [CartController::class, "addToCart"]);
+    Route::get("/cart/{userId}", [CartController::class, "getCart"]);
+});
+
+// Rotas compatíveis com o frontend existente (sem prefixo)
+Route::get("/status", [GeneralController::class, "status"]);
+Route::get("/categories", [CategoryController::class, "categories"]);
+Route::get("/products", [ProductController::class, "products"]);
+Route::get("/products/{id}", [ProductController::class, "product"]);
+Route::post("/products", [ProductController::class, "addProduct"]);
+Route::get("/users", [UserController::class, "users"]);
+Route::post("/register", [UserController::class, "register"]);
+Route::post("/login", [UserController::class, "login"]);
+Route::get("/orders", [OrderController::class, "orders"]);
+Route::post("/orders", [OrderController::class, "orders"]);
+Route::get("/dashboard", [GeneralController::class, "dashboard"]);
+Route::post("/cart/add", [CartController::class, "addToCart"]);
+Route::get("/cart/{userId}", [CartController::class, "getCart"]);
+
+
+
+// Rotas de Notificações API
+Route::middleware('auth:sanctum')->prefix('notifications')->group(function () {
+    Route::get('/', [App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::post('/{id}/mark-as-read', [App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    Route::post('/mark-all-as-read', [App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+    Route::get('/unread-count', [App\Http\Controllers\Api\NotificationController::class, 'getUnreadCount']);
+});
+
