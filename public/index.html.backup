@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroPerto Marketplace - Sistema Completo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c5530;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-top: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            margin: 5px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: #2c5530;
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-card p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #2c5530;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .form-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c5530;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2c5530;
+        }
+
+        .btn {
+            background: #2c5530;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #1e3a21;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2c5530;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #2c5530;
+        }
+
+        .product-card h4 {
+            color: #2c5530;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .product-price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 10px 0;
+        }
+
+        .product-stock {
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .feature-card h4 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .nav-tab {
+                margin: 2px 0;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 AgroPerto Marketplace</h1>
+            <p>Sistema Completo para Produtores e Consumidores</p>
+            <div class="status-badge" id="systemStatus">
+                ✅ Sistema Funcionando
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="showSection('products')">🥕 Produtos</button>
+            <button class="nav-tab" onclick="showSection('orders')">📦 Pedidos</button>
+            <button class="nav-tab" onclick="showSection('users')">👥 Usuários</button>
+            <button class="nav-tab" onclick="showSection('add-product')">➕ Novo Produto</button>
+            <button class="nav-tab" onclick="showSection('add-order')">🛒 Novo Pedido</button>
+            <button class="nav-tab" onclick="showSection('features')">⚡ Funcionalidades</button>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section active">
+            <h2>📊 Dashboard de Vendas</h2>
+            <div class="dashboard-grid" id="dashboardCards">
+                <div class="loading">Carregando dashboard...</div>
+            </div>
+            
+            <h3>📋 Pedidos Recentes</h3>
+            <div class="table-container" id="recentOrders">
+                <div class="loading">Carregando pedidos...</div>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div id="products" class="content-section">
+            <h2>🥕 Produtos Disponíveis</h2>
+            <div class="form-group">
+                <input type="text" id="productSearch" placeholder="🔍 Buscar produtos..." onkeyup="searchProducts()">
+            </div>
+            <div id="productsList">
+                <div class="loading">Carregando produtos...</div>
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <div id="orders" class="content-section">
+            <h2>📦 Todos os Pedidos</h2>
+            <div class="table-container" id="ordersList">
+                <div class="loading">Carregando pedidos...</div>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="users" class="content-section">
+            <h2>👥 Usuários do Sistema</h2>
+            <div class="table-container" id="usersList">
+                <div class="loading">Carregando usuários...</div>
+            </div>
+        </div>
+
+        <!-- Add Product Section -->
+        <div id="add-product" class="content-section">
+            <h2>➕ Cadastrar Novo Produto</h2>
+            <div class="form-container">
+                <form id="productForm">
+                    <div class="form-group">
+                        <label for="productName">Nome do Produto:</label>
+                        <input type="text" id="productName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">Descrição:</label>
+                        <textarea id="productDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Preço (R$):</label>
+                        <input type="number" id="productPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productStock">Estoque:</label>
+                        <input type="number" id="productStock" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productUnit">Unidade:</label>
+                        <select id="productUnit">
+                            <option value="kg">Kg</option>
+                            <option value="unidade">Unidade</option>
+                            <option value="litro">Litro</option>
+                            <option value="maço">Maço</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">Categoria:</label>
+                        <select id="productCategory">
+                            <option value="1">Frutas</option>
+                            <option value="2">Verduras</option>
+                            <option value="3">Legumes</option>
+                            <option value="4">Grãos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pickupLocation">Local de Retirada:</label>
+                        <input type="text" id="pickupLocation" placeholder="Ex: Feira do Produtor - Setor A">
+                    </div>
+                    <div class="form-group">
+                        <label for="pickupInstructions">Instruções de Retirada:</label>
+                        <textarea id="pickupInstructions" rows="2" placeholder="Ex: Procurar pela barraca do João"></textarea>
+                    </div>
+                    <button type="submit" class="btn">✅ Cadastrar Produto</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Order Section -->
+        <div id="add-order" class="content-section">
+            <h2>🛒 Realizar Novo Pedido</h2>
+            <div class="form-container">
+                <form id="orderForm">
+                    <div class="form-group">
+                        <label for="orderUser">Cliente:</label>
+                        <select id="orderUser">
+                            <option value="2">Maria Cliente</option>
+                            <option value="1">João Produtor</option>
+                            <option value="3">Pedro Vendedor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pickupDate">Data de Retirada:</label>
+                        <input type="date" id="pickupDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pickupTime">Horário de Retirada:</label>
+                        <input type="time" id="pickupTime" value="10:00" required>
+                    </div>
+                    
+                    <h4>Itens do Pedido:</h4>
+                    <div id="orderItems">
+                        <div class="form-group">
+                            <label>Produto:</label>
+                            <select class="order-product">
+                                <option value="">Carregando produtos...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantidade:</label>
+                            <input type="number" class="order-quantity" min="1" value="1">
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary" onclick="addOrderItem()">➕ Adicionar Item</button>
+                    <button type="submit" class="btn">🛒 Realizar Pedido</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div id="features" class="content-section">
+            <h2>⚡ Funcionalidades Implementadas</h2>
+            <div class="features-grid" id="featuresList">
+                <div class="loading">Carregando funcionalidades...</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 AgroPerto Marketplace - Conectando Produtores e Consumidores 🌱</p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api.php';
+        
+        // Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Load data for the section
+            loadSectionData(sectionId);
+        }
+
+        function loadSectionData(sectionId) {
+            switch(sectionId) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'products':
+                    loadProducts();
+                    break;
+                case 'orders':
+                    loadOrders();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'add-order':
+                    loadProductsForOrder();
+                    break;
+                case 'features':
+                    loadFeatures();
+                    break;
+            }
+        }
+
+        // API Functions
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(API_BASE + endpoint, options);
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return { error: 'Erro na comunicação com a API' };
+            }
+        }
+
+        // Dashboard
+        async function loadDashboard() {
+            const data = await apiCall('/dashboard');
+            
+            if (data.dashboard) {
+                const dashboard = data.dashboard;
+                
+                document.getElementById('dashboardCards').innerHTML = `
+                    <div class="dashboard-card">
+                        <h3>${dashboard.total_products}</h3>
+                        <p>Produtos Cadastrados</p>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>${dashboard.total_orders}</h3>
+                        <p>Pedidos Realizados</p>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>${dashboard.total_users}</h3>
+                        <p>Usuários Ativos</p>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>R$ ${parseFloat(dashboard.total_revenue || 0).toFixed(2)}</h3>
+                        <p>Receita Total</p>
+                    </div>
+                `;
+                
+                // Recent orders
+                if (dashboard.recent_orders && dashboard.recent_orders.length > 0) {
+                    let ordersHtml = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Cliente</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Data Retirada</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    dashboard.recent_orders.forEach(order => {
+                        ordersHtml += `
+                            <tr>
+                                <td>#${order.id}</td>
+                                <td>${order.customer_name || 'N/A'}</td>
+                                <td>R$ ${parseFloat(order.total_amount).toFixed(2)}</td>
+                                <td>${order.status}</td>
+                                <td>${order.pickup_date} ${order.pickup_time}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    ordersHtml += '</tbody></table>';
+                    document.getElementById('recentOrders').innerHTML = ordersHtml;
+                } else {
+                    document.getElementById('recentOrders').innerHTML = '<p>Nenhum pedido encontrado.</p>';
+                }
+            }
+        }
+
+        // Products
+        async function loadProducts() {
+            const data = await apiCall('/products');
+            
+            if (data.products) {
+                let html = '';
+                data.products.forEach(product => {
+                    html += `
+                        <div class="product-card">
+                            <h4>${product.name}</h4>
+                            <p>${product.description || 'Sem descrição'}</p>
+                            <div class="product-price">R$ ${parseFloat(product.price).toFixed(2)} / ${product.unit}</div>
+                            <div class="product-stock">Estoque: ${product.stock_quantity || product.stock}</div>
+                            <p><strong>Categoria:</strong> ${product.category_name || 'N/A'}</p>
+                            <p><strong>Produtor:</strong> ${product.producer_name || 'N/A'}</p>
+                            <p><strong>Local:</strong> ${product.pickup_location || 'N/A'}</p>
+                        </div>
+                    `;
+                });
+                document.getElementById('productsList').innerHTML = html;
+            }
+        }
+
+        function searchProducts() {
+            const searchTerm = document.getElementById('productSearch').value.toLowerCase();
+            const products = document.querySelectorAll('.product-card');
+            
+            products.forEach(product => {
+                const text = product.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    product.style.display = 'block';
+                } else {
+                    product.style.display = 'none';
+                }
+            });
+        }
+
+        // Orders
+        async function loadOrders() {
+            const data = await apiCall('/orders');
+            
+            if (data.orders && data.orders.length > 0) {
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Data Retirada</th>
+                                <th>Itens</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.orders.forEach(order => {
+                    let itemsText = '';
+                    if (order.items) {
+                        itemsText = order.items.map(item => 
+                            `${item.quantity}x ${item.product_name}`
+                        ).join(', ');
+                    }
+                    
+                    html += `
+                        <tr>
+                            <td>#${order.id}</td>
+                            <td>${order.customer_name || 'N/A'}</td>
+                            <td>R$ ${parseFloat(order.total_amount).toFixed(2)}</td>
+                            <td>${order.status}</td>
+                            <td>${order.pickup_date} ${order.pickup_time}</td>
+                            <td>${itemsText}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('ordersList').innerHTML = html;
+            } else {
+                document.getElementById('ordersList').innerHTML = '<p>Nenhum pedido encontrado.</p>';
+            }
+        }
+
+        // Users
+        async function loadUsers() {
+            const data = await apiCall('/users');
+            
+            if (data.users && data.users.length > 0) {
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Tipo</th>
+                                <th>Cadastro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.users.forEach(user => {
+                    html += `
+                        <tr>
+                            <td>#${user.id}</td>
+                            <td>${user.name}</td>
+                            <td>${user.email}</td>
+                            <td>${user.type}</td>
+                            <td>${new Date(user.created_at).toLocaleDateString('pt-BR')}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table>';
+                document.getElementById('usersList').innerHTML = html;
+            } else {
+                document.getElementById('usersList').innerHTML = '<p>Nenhum usuário encontrado.</p>';
+            }
+        }
+
+        // Features
+        async function loadFeatures() {
+            const data = await apiCall('/features');
+            
+            if (data.implemented_features) {
+                let html = '';
+                Object.entries(data.implemented_features).forEach(([key, value]) => {
+                    html += `
+                        <div class="feature-card">
+                            <h4>${value}</h4>
+                        </div>
+                    `;
+                });
+                document.getElementById('featuresList').innerHTML = html;
+            }
+        }
+
+        // Forms
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('productName').value,
+                description: document.getElementById('productDescription').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                stock: parseInt(document.getElementById('productStock').value),
+                unit: document.getElementById('productUnit').value,
+                category_id: parseInt(document.getElementById('productCategory').value),
+                user_id: 1,
+                pickup_location: document.getElementById('pickupLocation').value,
+                pickup_instructions: document.getElementById('pickupInstructions').value
+            };
+            
+            const result = await apiCall('/products', 'POST', formData);
+            
+            if (result.message) {
+                alert('✅ ' + result.message);
+                document.getElementById('productForm').reset();
+                loadProducts();
+            } else {
+                alert('❌ Erro ao cadastrar produto');
+            }
+        });
+
+        async function loadProductsForOrder() {
+            const data = await apiCall('/products');
+            
+            if (data.products) {
+                const selects = document.querySelectorAll('.order-product');
+                selects.forEach(select => {
+                    let html = '<option value="">Selecione um produto</option>';
+                    data.products.forEach(product => {
+                        html += `<option value="${product.id}" data-price="${product.price}">
+                            ${product.name} - R$ ${parseFloat(product.price).toFixed(2)}
+                        </option>`;
+                    });
+                    select.innerHTML = html;
+                });
+            }
+        }
+
+        function addOrderItem() {
+            const container = document.getElementById('orderItems');
+            const newItem = document.createElement('div');
+            newItem.innerHTML = `
+                <div class="form-group">
+                    <label>Produto:</label>
+                    <select class="order-product">
+                        <option value="">Carregando produtos...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Quantidade:</label>
+                    <input type="number" class="order-quantity" min="1" value="1">
+                </div>
+                <hr>
+            `;
+            container.appendChild(newItem);
+            loadProductsForOrder();
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const products = document.querySelectorAll('.order-product');
+            const quantities = document.querySelectorAll('.order-quantity');
+            
+            let items = [];
+            let totalAmount = 0;
+            
+            for (let i = 0; i < products.length; i++) {
+                if (products[i].value && quantities[i].value) {
+                    const price = parseFloat(products[i].selectedOptions[0].dataset.price);
+                    const quantity = parseInt(quantities[i].value);
+                    
+                    items.push({
+                        product_id: parseInt(products[i].value),
+                        quantity: quantity,
+                        price: price
+                    });
+                    
+                    totalAmount += price * quantity;
+                }
+            }
+            
+            if (items.length === 0) {
+                alert('❌ Adicione pelo menos um item ao pedido');
+                return;
+            }
+            
+            const formData = {
+                user_id: parseInt(document.getElementById('orderUser').value),
+                total_amount: totalAmount,
+                pickup_date: document.getElementById('pickupDate').value,
+                pickup_time: document.getElementById('pickupTime').value,
+                items: items
+            };
+            
+            const result = await apiCall('/orders', 'POST', formData);
+            
+            if (result.message) {
+                alert('✅ ' + result.message);
+                document.getElementById('orderForm').reset();
+                loadOrders();
+            } else {
+                alert('❌ Erro ao realizar pedido');
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            
+            // Set default pickup date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('pickupDate').value = tomorrow.toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>

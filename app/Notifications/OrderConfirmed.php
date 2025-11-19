@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Notifications;
+
+use App\Models\Order;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+
+class OrderConfirmed extends Notification
+{
+    use Queueable;
+
+    protected $order;
+
+    /**
+     * Create a new notification instance.
+     */
+    public function __construct(Order $order)
+    {
+        $this->order = $order;
+    }
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail', 'database'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+                    ->subject('✅ Pedido Confirmado - AgroPerto')
+                    ->greeting('Ótimas notícias!')
+                    ->line('Seu pedido #' . $this->order->order_number . ' foi confirmado pelo produtor!')
+                    ->line('**Detalhes da Retirada:**')
+                    ->line('📅 Data: ' . $this->order->pickup_date->format('d/m/Y'))
+                    ->line('🕐 Horário: ' . $this->order->pickup_time)
+                    ->line('💰 Total: R$ ' . number_format($this->order->total_amount, 2, ',', '.'))
+                    ->action('Ver Detalhes do Pedido', route('orders.show', $this->order->id))
+                    ->line('Obrigado por comprar com produtores locais!');
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'order_id' => $this->order->id,
+            'order_number' => $this->order->order_number,
+            'message' => 'Seu pedido foi confirmado pelo produtor!',
+            'pickup_date' => $this->order->pickup_date->format('d/m/Y'),
+            'pickup_time' => $this->order->pickup_time,
+            'total_amount' => $this->order->total_amount,
+        ];
+    }
+}

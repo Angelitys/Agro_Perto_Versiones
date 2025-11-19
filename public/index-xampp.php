@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroPerto - Produtos Frescos da Agricultura Familiar</title>
+    <meta name="description" content="Descubra produtos frescos e orgânicos direto dos produtores rurais. Apoie a agricultura familiar brasileira!">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-gray-50" x-data="app()">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="#" @click="showSection('home')" class="flex items-center space-x-2">
+                        <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-900">AgroPerto</h1>
+                            <p class="text-xs text-gray-500">Agricultura Familiar</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="flex-1 max-w-lg mx-8">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            x-model="searchTerm"
+                            @keyup.enter="searchProducts()"
+                            placeholder="Buscar produtos..." 
+                            class="w-full pl-4 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        >
+                        <button @click="searchProducts()" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-green-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="flex items-center space-x-6">
+                    <template x-if="user">
+                        <div class="flex items-center space-x-4">
+                            <!-- Cart -->
+                            <button @click="showSection('cart')" class="relative text-gray-600 hover:text-green-600 transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v6a2 2 0 002 2h4a2 2 0 002-2v-6m-6 0V9a2 2 0 012-2h2a2 2 0 012 2v4.01"></path>
+                                </svg>
+                                <span x-text="cartCount" class="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"></span>
+                            </button>
+
+                            <!-- User Menu -->
+                            <div class="relative" x-data="{ open: false }">
+                                <button @click="open = !open" class="flex items-center space-x-2 text-gray-600 hover:text-green-600 transition-colors">
+                                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                        <span class="text-sm font-medium text-green-600" x-text="user ? user.name.charAt(0) : ''"></span>
+                                    </div>
+                                    <span class="hidden md:block" x-text="user ? user.name : ''"></span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                    <button @click="showSection('dashboard'); open = false" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Dashboard</button>
+                                    <button @click="showSection('my-orders'); open = false" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Meus Pedidos</button>
+                                    <button @click="showSection('profile'); open = false" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Perfil</button>
+                                    <hr class="my-1">
+                                    <button @click="logout(); open = false" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sair</button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <template x-if="!user">
+                        <div class="flex items-center space-x-4">
+                            <button @click="showSection('login')" class="text-gray-600 hover:text-green-600 transition-colors">Entrar</button>
+                            <button @click="showSection('register')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Cadastrar</button>
+                        </div>
+                    </template>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Connection Status -->
+    <div x-show="connectionStatus" x-transition class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mx-4 mt-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm" x-text="connectionStatus"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        <!-- Flash Messages -->
+        <div x-show="message" x-transition class="mx-4 mt-4">
+            <div :class="messageType === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'" class="border px-4 py-3 rounded relative" role="alert">
+                <span x-text="message"></span>
+                <button @click="message = ''" class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                    <svg class="fill-current h-6 w-6" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Home Section -->
+        <div x-show="currentSection === 'home'" x-transition>
+            <!-- Hero Section -->
+            <section class="bg-gradient-to-r from-green-600 to-green-700 text-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h1 class="text-4xl lg:text-6xl font-bold mb-6">
+                                Produtos Frescos
+                                <span class="text-green-200">Direto do Campo</span>
+                            </h1>
+                            <p class="text-xl mb-8 text-green-100">
+                                Conectamos você diretamente aos produtores rurais. Produtos frescos, orgânicos e sustentáveis entregues na sua porta.
+                            </p>
+                            
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <button @click="showSection('products')" class="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors text-center">
+                                    Ver Produtos
+                                </button>
+                                <button @click="showSection('register')" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-600 transition-colors text-center">
+                                    Cadastre-se
+                                </button>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="bg-white rounded-2xl p-8 shadow-2xl">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-green-50 rounded-lg p-4 text-center">
+                                        <div class="text-2xl mb-2">🥕</div>
+                                        <div class="text-green-800 font-semibold">Verduras Frescas</div>
+                                    </div>
+                                    <div class="bg-orange-50 rounded-lg p-4 text-center">
+                                        <div class="text-2xl mb-2">🍎</div>
+                                        <div class="text-orange-800 font-semibold">Frutas Orgânicas</div>
+                                    </div>
+                                    <div class="bg-yellow-50 rounded-lg p-4 text-center">
+                                        <div class="text-2xl mb-2">🥛</div>
+                                        <div class="text-yellow-800 font-semibold">Laticínios</div>
+                                    </div>
+                                    <div class="bg-red-50 rounded-lg p-4 text-center">
+                                        <div class="text-2xl mb-2">🍯</div>
+                                        <div class="text-red-800 font-semibold">Mel Puro</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Categories Section -->
+            <section class="py-16">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">Categorias de Produtos</h2>
+                        <p class="text-gray-600">Explore nossa variedade de produtos frescos da agricultura familiar</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" x-show="categories.length > 0">
+                        <template x-for="category in categories" :key="category.id">
+                            <button @click="filterByCategory(category.id)" class="group">
+                                <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-center">
+                                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors">
+                                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="font-semibold text-gray-900 group-hover:text-green-600 transition-colors" x-text="category.name"></h3>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Products -->
+            <section class="py-16 bg-gray-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">Produtos em Destaque</h2>
+                        <p class="text-gray-600">Os produtos mais frescos e populares da nossa plataforma</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" x-show="featuredProducts.length > 0">
+                        <template x-for="product in featuredProducts" :key="product.id">
+                            <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                                <div class="w-full h-48 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                                    <svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                
+                                <div class="p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full" x-text="product.category_name"></span>
+                                        <span class="text-xs text-gray-500" x-text="product.stock + ' ' + product.unit"></span>
+                                    </div>
+                                    
+                                    <h3 class="font-semibold text-gray-900 mb-1" x-text="product.name"></h3>
+                                    <p class="text-sm text-gray-600 mb-2 line-clamp-2" x-text="product.description"></p>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <span class="text-lg font-bold text-green-600" x-text="'R$ ' + parseFloat(product.price).toFixed(2).replace('.', ',')"></span>
+                                            <span class="text-xs text-gray-500" x-text="'/ ' + product.unit"></span>
+                                        </div>
+                                        <button @click="addToCart(product)" class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-700 transition-colors">
+                                            Adicionar
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="flex items-center mt-2 text-xs text-gray-500">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        <span x-text="product.producer_name || 'Agricultura Familiar'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <div class="text-center mt-8">
+                        <button @click="showSection('products')" class="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                            Ver Todos os Produtos
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Login Section -->
+        <div x-show="currentSection === 'login'" x-transition>
+            <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                <div class="max-w-md w-full space-y-8">
+                    <div>
+                        <div class="mx-auto h-12 w-12 bg-green-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                            Entre na sua conta
+                        </h2>
+                        <p class="mt-2 text-center text-sm text-gray-600">
+                            Ou
+                            <button @click="showSection('register')" class="font-medium text-green-600 hover:text-green-500">
+                                cadastre-se gratuitamente
+                            </button>
+                        </p>
+                    </div>
+                    <form @submit.prevent="login()" class="mt-8 space-y-6">
+                        <div class="rounded-md shadow-sm -space-y-px">
+                            <div>
+                                <input x-model="loginForm.email" type="email" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Email">
+                            </div>
+                            <div>
+                                <input x-model="loginForm.password" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Senha">
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                Entrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Section -->
+        <div x-show="currentSection === 'register'" x-transition>
+            <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                <div class="max-w-md w-full space-y-8">
+                    <div>
+                        <div class="mx-auto h-12 w-12 bg-green-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                            Criar conta
+                        </h2>
+                        <p class="mt-2 text-center text-sm text-gray-600">
+                            Ou
+                            <button @click="showSection('login')" class="font-medium text-green-600 hover:text-green-500">
+                                entre na sua conta existente
+                            </button>
+                        </p>
+                    </div>
+                    <form @submit.prevent="register()" class="mt-8 space-y-6">
+                        <div class="space-y-4">
+                            <div>
+                                <input x-model="registerForm.name" type="text" required class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Nome completo">
+                            </div>
+                            <div>
+                                <input x-model="registerForm.email" type="email" required class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Email">
+                            </div>
+                            <div>
+                                <input x-model="registerForm.phone" type="tel" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Telefone (opcional)">
+                            </div>
+                            <div>
+                                <select x-model="registerForm.type" class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm">
+                                    <option value="consumer">Consumidor</option>
+                                    <option value="producer">Produtor</option>
+                                </select>
+                            </div>
+                            <div>
+                                <input x-model="registerForm.password" type="password" required class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Senha">
+                            </div>
+                            <div>
+                                <input x-model="registerForm.password_confirmation" type="password" required class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" placeholder="Confirmar senha">
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                Cadastrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div x-show="currentSection === 'products'" x-transition>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900">Produtos Disponíveis</h1>
+                    <template x-if="user && user.type === 'producer'">
+                        <button @click="showSection('add-product')" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            Adicionar Produto
+                        </button>
+                    </template>
+                </div>
+                
+                <!-- Filters -->
+                <div class="mb-6 flex flex-wrap gap-4">
+                    <select x-model="selectedCategory" @change="filterProducts()" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500">
+                        <option value="">Todas as categorias</option>
+                        <template x-for="category in categories" :key="category.id">
+                            <option :value="category.id" x-text="category.name"></option>
+                        </template>
+                    </select>
+                </div>
+                
+                <!-- Products Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <template x-for="product in filteredProducts" :key="product.id">
+                        <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                            <div class="w-full h-48 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                                <svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            
+                            <div class="p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full" x-text="product.category_name"></span>
+                                    <span class="text-xs text-gray-500" x-text="product.stock + ' ' + product.unit"></span>
+                                </div>
+                                
+                                <h3 class="font-semibold text-gray-900 mb-1" x-text="product.name"></h3>
+                                <p class="text-sm text-gray-600 mb-2 line-clamp-2" x-text="product.description"></p>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span class="text-lg font-bold text-green-600" x-text="'R$ ' + parseFloat(product.price).toFixed(2).replace('.', ',')"></span>
+                                        <span class="text-xs text-gray-500" x-text="'/ ' + product.unit"></span>
+                                    </div>
+                                    <template x-if="user">
+                                        <button @click="addToCart(product)" class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-700 transition-colors">
+                                            Adicionar
+                                        </button>
+                                    </template>
+                                </div>
+                                
+                                <div class="flex items-center mt-2 text-xs text-gray-500">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    <span x-text="product.producer_name || 'Agricultura Familiar'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Product Section -->
+        <div x-show="currentSection === 'add-product'" x-transition>
+            <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-8">Adicionar Produto</h1>
+                
+                <form @submit.prevent="addProduct()" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nome do Produto</label>
+                        <input x-model="productForm.name" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Descrição</label>
+                        <textarea x-model="productForm.description" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"></textarea>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Preço (R$)</label>
+                            <input x-model="productForm.price" type="number" step="0.01" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Estoque</label>
+                            <input x-model="productForm.stock" type="number" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Unidade</label>
+                            <select x-model="productForm.unit" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                                <option value="kg">Kg</option>
+                                <option value="unidade">Unidade</option>
+                                <option value="litro">Litro</option>
+                                <option value="maço">Maço</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Categoria</label>
+                            <select x-model="productForm.category_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                                <template x-for="category in categories" :key="category.id">
+                                    <option :value="category.id" x-text="category.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Local de Retirada</label>
+                        <input x-model="productForm.pickup_location" type="text" placeholder="Ex: Feira do Produtor - Setor A" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Instruções de Retirada</label>
+                        <textarea x-model="productForm.pickup_instructions" rows="2" placeholder="Ex: Procurar pela barraca do João" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"></textarea>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" @click="showSection('products')" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            Adicionar Produto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cart Section -->
+        <div x-show="currentSection === 'cart'" x-transition>
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-8">Carrinho de Compras</h1>
+                
+                <template x-if="cart.length === 0">
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.1 5H19M7 13v6a2 2 0 002 2h4a2 2 0 002-2v-6m-6 0V9a2 2 0 012-2h2a2 2 0 012 2v4.01"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">Carrinho vazio</h3>
+                        <p class="mt-1 text-sm text-gray-500">Adicione produtos para começar suas compras.</p>
+                        <div class="mt-6">
+                            <button @click="showSection('products')" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                Ver Produtos
+                            </button>
+                        </div>
+                    </div>
+                </template>
+                
+                <template x-if="cart.length > 0">
+                    <div>
+                        <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                            <ul class="divide-y divide-gray-200">
+                                <template x-for="item in cart" :key="item.id">
+                                    <li class="px-6 py-4">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-16 w-16 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center">
+                                                    <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="text-sm font-medium text-gray-900" x-text="item.name"></div>
+                                                    <div class="text-sm text-gray-500" x-text="'R$ ' + parseFloat(item.price).toFixed(2).replace('.', ',') + ' / ' + item.unit"></div>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-4">
+                                                <div class="flex items-center space-x-2">
+                                                    <button @click="updateCartQuantity(item.id, item.quantity - 1)" class="text-gray-400 hover:text-gray-600">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <span class="text-gray-900 font-medium" x-text="item.quantity"></span>
+                                                    <button @click="updateCartQuantity(item.id, item.quantity + 1)" class="text-gray-400 hover:text-gray-600">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <div class="text-sm font-medium text-gray-900" x-text="'R$ ' + (item.price * item.quantity).toFixed(2).replace('.', ',')"></div>
+                                                <button @click="removeFromCart(item.id)" class="text-red-400 hover:text-red-600">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                        
+                        <div class="mt-6 bg-gray-50 px-6 py-4 rounded-lg">
+                            <div class="flex justify-between text-lg font-medium text-gray-900">
+                                <span>Total:</span>
+                                <span x-text="'R$ ' + cartTotal.toFixed(2).replace('.', ',')"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-end space-x-4">
+                            <button @click="showSection('products')" class="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                Continuar Comprando
+                            </button>
+                            <button @click="showSection('checkout')" class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                                Finalizar Compra
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Checkout Section -->
+        <div x-show="currentSection === 'checkout'" x-transition>
+            <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-8">Finalizar Compra</h1>
+                
+                <form @submit.prevent="createOrder()" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Data de Retirada</label>
+                        <input x-model="orderForm.pickup_date" type="date" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Horário de Retirada</label>
+                        <input x-model="orderForm.pickup_time" type="time" value="10:00" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    
+                    <!-- Order Summary -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Resumo do Pedido</h3>
+                        <template x-for="item in cart" :key="item.id">
+                            <div class="flex justify-between py-2">
+                                <span x-text="item.quantity + 'x ' + item.name"></span>
+                                <span x-text="'R$ ' + (item.price * item.quantity).toFixed(2).replace('.', ',')"></span>
+                            </div>
+                        </template>
+                        <div class="border-t pt-2 mt-2">
+                            <div class="flex justify-between font-medium">
+                                <span>Total:</span>
+                                <span x-text="'R$ ' + cartTotal.toFixed(2).replace('.', ',')"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" @click="showSection('cart')" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                            Voltar ao Carrinho
+                        </button>
+                        <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                            Confirmar Pedido
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div x-show="currentSection === 'dashboard'" x-transition>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
+                
+                <!-- Dashboard Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Total de Produtos</dt>
+                                        <dd class="text-lg font-medium text-gray-900" x-text="dashboardData.total_products || 0"></dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Total de Pedidos</dt>
+                                        <dd class="text-lg font-medium text-gray-900" x-text="dashboardData.total_orders || 0"></dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Total de Usuários</dt>
+                                        <dd class="text-lg font-medium text-gray-900" x-text="dashboardData.total_users || 0"></dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white overflow-hidden shadow rounded-lg">
+                        <div class="p-5">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="text-sm font-medium text-gray-500 truncate">Receita Total</dt>
+                                        <dd class="text-lg font-medium text-gray-900" x-text="'R$ ' + (dashboardData.total_revenue || 0).toFixed(2).replace('.', ',')"></dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Orders -->
+                <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                    <div class="px-4 py-5 sm:px-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Pedidos Recentes</h3>
+                    </div>
+                    <ul class="divide-y divide-gray-200">
+                        <template x-for="order in dashboardData.recent_orders || []" :key="order.id">
+                            <li class="px-4 py-4 sm:px-6">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800" x-text="'#' + order.id"></span>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900" x-text="order.customer_name || 'Cliente'"></div>
+                                            <div class="text-sm text-gray-500" x-text="order.pickup_date + ' ' + order.pickup_time"></div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <div class="text-sm text-gray-900" x-text="'R$ ' + parseFloat(order.total_amount).toFixed(2).replace('.', ',')"></div>
+                                        <div class="ml-2 flex-shrink-0">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800" x-text="order.status"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Orders Section -->
+        <div x-show="currentSection === 'my-orders'" x-transition>
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-8">Meus Pedidos</h1>
+                
+                <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                    <ul class="divide-y divide-gray-200">
+                        <template x-for="order in myOrders" :key="order.id">
+                            <li class="px-4 py-4 sm:px-6">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800" x-text="'Pedido #' + order.id"></span>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900" x-text="'R$ ' + parseFloat(order.total_amount).toFixed(2).replace('.', ',')"></div>
+                                            <div class="text-sm text-gray-500" x-text="'Retirada: ' + order.pickup_date + ' às ' + order.pickup_time"></div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800" x-text="order.status"></span>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <div class="text-sm text-gray-600">
+                                        <span>Itens: </span>
+                                        <template x-for="item in order.items || []" :key="item.id">
+                                            <span x-text="item.quantity + 'x ' + item.product_name + ', '"></span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <span class="font-bold">AgroPerto</span>
+                    </div>
+                    <p class="text-gray-300 text-sm">Conectando produtores rurais diretamente aos consumidores, promovendo a agricultura familiar sustentável.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Produtos</h3>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><button @click="showSection('products')" class="hover:text-white">Todos os Produtos</button></li>
+                        <li><button @click="filterByCategory(1)" class="hover:text-white">Frutas</button></li>
+                        <li><button @click="filterByCategory(2)" class="hover:text-white">Verduras</button></li>
+                        <li><button @click="filterByCategory(3)" class="hover:text-white">Legumes</button></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Suporte</h3>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="#" class="hover:text-white">Central de Ajuda</a></li>
+                        <li><a href="#" class="hover:text-white">Como Comprar</a></li>
+                        <li><a href="#" class="hover:text-white">Como Vender</a></li>
+                        <li><a href="#" class="hover:text-white">Contato</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-4">Sobre</h3>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="#" class="hover:text-white">Nossa História</a></li>
+                        <li><a href="#" class="hover:text-white">Missão</a></li>
+                        <li><a href="#" class="hover:text-white">Sustentabilidade</a></li>
+                        <li><a href="#" class="hover:text-white">Parceiros</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-300">
+                <p>&copy; 2025 AgroPerto. Todos os direitos reservados. Desenvolvido para apoiar a agricultura familiar brasileira.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function app() {
+            return {
+                // State
+                currentSection: 'home',
+                user: null,
+                message: '',
+                messageType: 'success',
+                connectionStatus: '',
+                
+                // Data
+                categories: [],
+                products: [],
+                featuredProducts: [],
+                filteredProducts: [],
+                cart: [],
+                cartCount: 0,
+                cartTotal: 0,
+                dashboardData: {},
+                myOrders: [],
+                
+                // Search
+                searchTerm: '',
+                selectedCategory: '',
+                
+                // Forms
+                loginForm: {
+                    email: '',
+                    password: ''
+                },
+                registerForm: {
+                    name: '',
+                    email: '',
+                    phone: '',
+                    type: 'consumer',
+                    password: '',
+                    password_confirmation: ''
+                },
+                productForm: {
+                    name: '',
+                    description: '',
+                    price: '',
+                    stock: '',
+                    unit: 'kg',
+                    category_id: 1,
+                    pickup_location: '',
+                    pickup_instructions: ''
+                },
+                orderForm: {
+                    pickup_date: '',
+                    pickup_time: '10:00'
+                },
+
+                // Initialize
+                init() {
+                    this.testConnection();
+                    this.loadData();
+                    this.setDefaultPickupDate();
+                    this.loadUserFromStorage();
+                },
+
+                async testConnection() {
+                    try {
+                        const result = await this.apiCall('/status');
+                        if (result.status === 'OK') {
+                            this.connectionStatus = `✅ Conectado ao XAMPP/MariaDB - ${result.tables_found} tabelas encontradas`;
+                            setTimeout(() => {
+                                this.connectionStatus = '';
+                            }, 5000);
+                        } else {
+                            this.connectionStatus = '❌ Erro de conexão com o banco de dados';
+                        }
+                    } catch (error) {
+                        this.connectionStatus = '❌ Erro de conexão com a API';
+                    }
+                },
+
+                setDefaultPickupDate() {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    this.orderForm.pickup_date = tomorrow.toISOString().split('T')[0];
+                },
+
+                loadUserFromStorage() {
+                    const userData = localStorage.getItem('agroperto_user');
+                    if (userData) {
+                        this.user = JSON.parse(userData);
+                        this.loadUserData();
+                    }
+                },
+
+                saveUserToStorage() {
+                    if (this.user) {
+                        localStorage.setItem('agroperto_user', JSON.stringify(this.user));
+                    } else {
+                        localStorage.removeItem('agroperto_user');
+                    }
+                },
+
+                // API calls - CONFIGURADO PARA XAMPP
+                async apiCall(endpoint, method = 'GET', data = null) {
+                    try {
+                        const options = {
+                            method: method,
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        };
+                        
+                        if (data) {
+                            options.body = JSON.stringify(data);
+                        }
+                        
+                        // Usando a API configurada para XAMPP
+                        const response = await fetch('/agro-marketplace-alpha/public/api-xampp.php?path=' + endpoint, options);
+                        return await response.json();
+                    } catch (error) {
+                        console.error('API Error:', error);
+                        return { error: 'Erro na comunicação com a API' };
+                    }
+                },
+
+                async loadData() {
+                    // Load categories
+                    const categoriesData = await this.apiCall('/categories');
+                    if (categoriesData.categories) {
+                        this.categories = categoriesData.categories;
+                    }
+
+                    // Load products
+                    const productsData = await this.apiCall('/products');
+                    if (productsData.products) {
+                        this.products = productsData.products;
+                        this.filteredProducts = this.products;
+                        this.featuredProducts = this.products.slice(0, 4);
+                    }
+
+                    if (this.user) {
+                        this.loadUserData();
+                    }
+                },
+
+                async loadUserData() {
+                    // Load dashboard
+                    const dashboardData = await this.apiCall('/dashboard');
+                    if (dashboardData.dashboard) {
+                        this.dashboardData = dashboardData.dashboard;
+                    }
+
+                    // Load user orders
+                    const ordersData = await this.apiCall('/orders');
+                    if (ordersData.orders) {
+                        this.myOrders = ordersData.orders.filter(order => 
+                            order.user_id == this.user.id
+                        );
+                    }
+                },
+
+                // Navigation
+                showSection(section) {
+                    this.currentSection = section;
+                    if (section === 'dashboard' && this.user) {
+                        this.loadUserData();
+                    }
+                },
+
+                // Authentication
+                async login() {
+                    // Simulate login - in real app, this would validate credentials
+                    const usersData = await this.apiCall('/users');
+                    if (usersData.users) {
+                        const user = usersData.users.find(u => u.email === this.loginForm.email);
+                        if (user) {
+                            this.user = user;
+                            this.saveUserToStorage();
+                            this.showMessage('Login realizado com sucesso!', 'success');
+                            this.showSection('home');
+                            this.loadUserData();
+                        } else {
+                            this.showMessage('Email ou senha incorretos', 'error');
+                        }
+                    }
+                },
+
+                async register() {
+                    if (this.registerForm.password !== this.registerForm.password_confirmation) {
+                        this.showMessage('As senhas não coincidem', 'error');
+                        return;
+                    }
+
+                    const result = await this.apiCall('/users', 'POST', this.registerForm);
+                    if (result.message) {
+                        this.showMessage('Cadastro realizado com sucesso!', 'success');
+                        // Auto login after register
+                        this.user = result.user;
+                        this.saveUserToStorage();
+                        this.showSection('home');
+                        this.loadUserData();
+                    } else {
+                        this.showMessage('Erro ao realizar cadastro', 'error');
+                    }
+                },
+
+                logout() {
+                    this.user = null;
+                    this.cart = [];
+                    this.cartCount = 0;
+                    this.cartTotal = 0;
+                    this.saveUserToStorage();
+                    this.showMessage('Logout realizado com sucesso!', 'success');
+                    this.showSection('home');
+                },
+
+                // Products
+                async addProduct() {
+                    if (!this.user || this.user.type !== 'producer') {
+                        this.showMessage('Apenas produtores podem adicionar produtos', 'error');
+                        return;
+                    }
+
+                    this.productForm.user_id = this.user.id;
+                    const result = await this.apiCall('/products', 'POST', this.productForm);
+                    
+                    if (result.message) {
+                        this.showMessage('Produto adicionado com sucesso!', 'success');
+                        this.productForm = {
+                            name: '',
+                            description: '',
+                            price: '',
+                            stock: '',
+                            unit: 'kg',
+                            category_id: 1,
+                            pickup_location: '',
+                            pickup_instructions: ''
+                        };
+                        this.loadData();
+                        this.showSection('products');
+                    } else {
+                        this.showMessage('Erro ao adicionar produto', 'error');
+                    }
+                },
+
+                filterProducts() {
+                    if (this.selectedCategory) {
+                        this.filteredProducts = this.products.filter(product => 
+                            product.category_id == this.selectedCategory
+                        );
+                    } else {
+                        this.filteredProducts = this.products;
+                    }
+                },
+
+                filterByCategory(categoryId) {
+                    this.selectedCategory = categoryId;
+                    this.filterProducts();
+                    this.showSection('products');
+                },
+
+                searchProducts() {
+                    if (this.searchTerm) {
+                        this.filteredProducts = this.products.filter(product =>
+                            product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                            product.description.toLowerCase().includes(this.searchTerm.toLowerCase())
+                        );
+                        this.showSection('products');
+                    }
+                },
+
+                // Cart
+                addToCart(product) {
+                    if (!this.user) {
+                        this.showMessage('Faça login para adicionar produtos ao carrinho', 'error');
+                        this.showSection('login');
+                        return;
+                    }
+
+                    const existingItem = this.cart.find(item => item.id === product.id);
+                    if (existingItem) {
+                        existingItem.quantity += 1;
+                    } else {
+                        this.cart.push({
+                            ...product,
+                            quantity: 1
+                        });
+                    }
+                    this.updateCartTotals();
+                    this.showMessage('Produto adicionado ao carrinho!', 'success');
+                },
+
+                updateCartQuantity(productId, newQuantity) {
+                    if (newQuantity <= 0) {
+                        this.removeFromCart(productId);
+                        return;
+                    }
+
+                    const item = this.cart.find(item => item.id === productId);
+                    if (item) {
+                        item.quantity = newQuantity;
+                        this.updateCartTotals();
+                    }
+                },
+
+                removeFromCart(productId) {
+                    this.cart = this.cart.filter(item => item.id !== productId);
+                    this.updateCartTotals();
+                    this.showMessage('Produto removido do carrinho', 'success');
+                },
+
+                updateCartTotals() {
+                    this.cartCount = this.cart.reduce((total, item) => total + item.quantity, 0);
+                    this.cartTotal = this.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+                },
+
+                // Orders
+                async createOrder() {
+                    if (this.cart.length === 0) {
+                        this.showMessage('Carrinho vazio', 'error');
+                        return;
+                    }
+
+                    const orderData = {
+                        user_id: this.user.id,
+                        total_amount: this.cartTotal,
+                        pickup_date: this.orderForm.pickup_date,
+                        pickup_time: this.orderForm.pickup_time,
+                        items: this.cart.map(item => ({
+                            product_id: item.id,
+                            quantity: item.quantity,
+                            price: item.price
+                        }))
+                    };
+
+                    const result = await this.apiCall('/orders', 'POST', orderData);
+                    
+                    if (result.message) {
+                        this.showMessage('Pedido realizado com sucesso!', 'success');
+                        this.cart = [];
+                        this.updateCartTotals();
+                        this.loadUserData();
+                        this.showSection('my-orders');
+                    } else {
+                        this.showMessage('Erro ao realizar pedido', 'error');
+                    }
+                },
+
+                // Utils
+                showMessage(text, type = 'success') {
+                    this.message = text;
+                    this.messageType = type;
+                    setTimeout(() => {
+                        this.message = '';
+                    }, 5000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

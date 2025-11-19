@@ -1,0 +1,337 @@
+[
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/cart/add",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\CartController@addToCart",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/cart/clear",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\CartController@clearCart",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/cart/remove",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\CartController@removeFromCart",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/cart/{user_id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\CartController@getCart",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/categories",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\CategoryController@categories",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/dashboard/sales-by-period",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\DashboardController@salesByPeriod",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/dashboard/sales-overview",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\DashboardController@salesOverview",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/dashboard/top-selling-products",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\DashboardController@topSellingProducts",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/login",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\UserController@login",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/notifications",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\NotificationController@index",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/notifications/mark-all-as-read",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\NotificationController@markAllAsRead",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/notifications/unread-count",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\NotificationController@getUnreadCount",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/notifications/{id}/mark-as-read",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\NotificationController@markAsRead",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/orders",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\OrderController@index",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/orders",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\OrderController@store",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/orders/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\OrderController@show",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/orders/{id}/confirm-delivery",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\OrderController@confirmDelivery",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT",
+        "uri": "api/orders/{id}/pickup-schedule",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\OrderController@updatePickupSchedule",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/products",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ProductController@products",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/products",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ProductController@addProduct",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/products/category/{category_id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ProductController@productsByCategory",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/products/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ProductController@product",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT",
+        "uri": "api/products/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ProductController@updateProduct",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api/products/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ProductController@deleteProduct",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/register",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\UserController@register",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/reviews",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ReviewController@index",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "POST",
+        "uri": "api/reviews",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ReviewController@store",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/reviews/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\ReviewController@show",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/user",
+        "name": null,
+        "action": "Closure",
+        "middleware": [
+            "api",
+            "App\\Http\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/users",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\UserController@users",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "GET|HEAD",
+        "uri": "api/users/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\UserController@getUser",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "PUT",
+        "uri": "api/users/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\UserController@updateUser",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "domain": null,
+        "method": "DELETE",
+        "uri": "api/users/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Api\\UserController@deleteUser",
+        "middleware": [
+            "api"
+        ]
+    }
+]
